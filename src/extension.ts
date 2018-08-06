@@ -48,22 +48,26 @@ export function activate(context: vscode.ExtensionContext) {
 
       fs.mkdirSync(projectFolderUri.fsPath);
 
-      const terminal = vscode.window.createTerminal(
-        "initialize project",
-        projectFolderUri.fsPath
-      );
+      const terminalOptions: vscode.TerminalOptions = { name: "Initialize project", cwd: projectFolderUri.fsPath };
+      const terminal = vscode.window.createTerminal(terminalOptions);
 
-      terminal.sendText("echo 'Sent text immediately after creating'");
-      terminal.sendText("mkdir dikkmore");
+      terminal.show(false);
+      terminal.sendText("echo 'Cloning project'");
+      terminal.sendText("git clone https://github.com/maximegris/angular-electron.git .");
 
-      // Open the created folder
+      vscode.window.showInformationMessage("Do you want to install the packages for the project?", { modal: true }, 'Install packages')
+        .then((selectedValue) => {
+          if (selectedValue && selectedValue === "Install packages") {
+            terminal.sendText("npm i");
+          }
+        });
+
       vscode.commands.executeCommand(
         "vscode.openFolder",
         projectFolderUri,
-        true
+        false
       );
-    }
-  );
+    });
 
   context.subscriptions.push(disposable);
 }
